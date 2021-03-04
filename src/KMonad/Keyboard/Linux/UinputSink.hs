@@ -30,26 +30,26 @@ import KMonad.Keyboard.Linux.Types
 --------------------------------------------------------------------------------
 -- $err
 
-type SinkId = String
+-- type SinkId = String
 
--- | A collection of everything that can go wrong with the 'UinputSink'
-data UinputSinkError
-  = UinputRegistrationError SinkId            -- ^ Could not register device
-  | UinputReleaseError      SinkId            -- ^ Could not release device
-  | SinkEncodeError         SinkId LRaw -- ^ Could not decode event
-  deriving Exception
+-- -- | A collection of everything that can go wrong with the 'UinputSink'
+-- data UinputSinkError
+--   = UinputRegistrationError SinkId            -- ^ Could not register device
+--   | UinputReleaseError      SinkId            -- ^ Could not release device
+--   | SinkEncodeError         SinkId LRaw -- ^ Could not decode event
+--   deriving Exception
 
--- | How to display UinputSink errors
-instance Show UinputSinkError where
-  show (UinputRegistrationError snk) = "Could not register sink with OS: " <> snk
-  show (UinputReleaseError snk) = "Could not unregister sink with OS: " <> snk
-  show (SinkEncodeError snk a) = unwords
-    [ "Could not encode Keyaction"
-    , show a
-    , "to bytes for writing to"
-    , snk
-    ]
-makeClassyPrisms ''UinputSinkError
+-- -- | How to display UinputSink errors
+-- instance Show UinputSinkError where
+--   show (UinputRegistrationError snk) = "Could not register sink with OS: " <> snk
+--   show (UinputReleaseError snk) = "Could not unregister sink with OS: " <> snk
+--   show (SinkEncodeError snk a) = unwords
+--     [ "Could not encode Keyaction"
+--     , show a
+--     , "to bytes for writing to"
+--     , snk
+--     ]
+-- makeClassyPrisms ''UinputSinkError
 
 
 --------------------------------------------------------------------------------

@@ -21,7 +21,9 @@ module KMonad.Keyboard.Types
   , HasSwitch(..)
 
     -- * $os
-  , CanOS(..)
+  , CanKIO(..)
+  , GetKey
+  , PutKey
   , HasKeycode(..)
 
     -- * $event
@@ -88,17 +90,24 @@ instance Display Switch where textDisplay = tshow
 -- equality and show it (for logging purposes).
 type CanKeycode c = (Eq c, Show c)
 
+type GetKey os m = m (KeyEvent (Keycode os))
+type PutKey os m = KeyEvent (Keycode os) -> m ()
+
 -- | Typeclass describing what is required to run an OS interface
-class (CanKeycode (Keycode os), Monad os) => CanOS os where
+class (CanKeycode (Keycode os), Monad os, Monad m) => CanKIO os m where
  
   -- | The keycode type for this OS
   type Keycode os :: *
-  -- | The action that returns the next event
-  getKey :: os (KeyEvent (Keycode os))
-  -- | The action that dispatches generated events
-  putKey :: KeyEvent (Keycode os) -> os ()
-  -- | Perform an action in the context of an acquired keyboard context
-  runOS  :: os a -> os a
+
+  -- | How to run an action that requires the capability to get and put key events
+  withKIO :: (GetKey os m -> PutKey os m -> m a) -> os (m a)
+ 
+  -- -- | The action that returns the next event
+  -- getKey :: os (KeyEvent (Keycode os))
+  -- -- | The action that dispatches generated events
+  -- putKey :: KeyEvent (Keycode os) -> os ()
+  -- -- | Perform an action in the context of an acquired keyboard context
+  -- runOS  :: os a -> os a
 
 -- | Typeclass describing how to access a 'Keycode' inside some structure
 class CanKeycode c => HasKeycode a c where

@@ -1,13 +1,18 @@
 {-# LANGUAGE DeriveAnyClass #-}
 module KMonad.Keyboard.Linux.Uinput
+  ( UinputCfg(..)
+  , HasUinputCfg(..)
+  , defUinputCfg
 
+  , withUinput
+  )
 where
 
-import KMonad.Prelude
+import KMonad.Prelude hiding (product)
 
 import Foreign.C.Types
 import Foreign.C.String
-import System.Posix
+import System.Posix hiding (version)
 import UnliftIO.Process (callCommand)
 
 import KMonad.Keyboard.Linux.Types
@@ -19,41 +24,35 @@ import KMonad.Keyboard.Linux.Types
 
 -- | How to configure `uinput`
 data UinputCfg = UinputCfg
-  { _vendorCode     :: !CInt           -- ^ USB Vendor code
-  , _productCode    :: !CInt           -- ^ USB Product code
-  , _productVersion :: !CInt           -- ^ USB Product version
-  , _keyboardName   :: !String         -- ^ Name to give to the keyboard
-  , _postInit       :: !(Maybe String) -- ^ Command to run after keyboard is made
+  { _vendor   :: !CInt           -- ^ USB Vendor code
+  , _product  :: !CInt           -- ^ USB Product code
+  , _version  :: !CInt           -- ^ USB Product version
+  , _name     :: !String         -- ^ Name to give to the keyboard
+  , _postInit :: !(Maybe String) -- ^ Command to run after keyboard is made
   } deriving (Eq, Show)
 makeClassy ''UinputCfg
 
 -- | Default Uinput configuration
 defUinputCfg :: UinputCfg
 defUinputCfg = UinputCfg
-  { _vendorCode     = 0x1235
-  , _productCode    = 0x5679
-  , _productVersion = 0x0000
-  , _keyboardName   = "KMonad simulated keyboard"
-  , _postInit       = Nothing
+  { _vendor   = 0x1234
+  , _product  = 0x5678
+  , _version  = 0x0000
+  , _name     = "KMonad simulated keyboard"
+  , _postInit = Nothing
   }
 
 -- | Environment for handling uinput operations
 data UinputEnv = UinputEnv
-  { _uinputCfg' :: UinputCfg    -- ^ The configuration of this uinput device
-  , _dev        :: MVar Fd -- ^ MVar to the filehandle of the device
+  { _uinputCfg' :: UinputCfg -- ^ The configuration of this uinput device
+  , _logFunc    :: LogFunc   -- ^ RIO logging function
+  , _dev        :: MVar Fd   -- ^ MVar to the filehandle of the device
   }
 makeClassy ''UinputEnv
 
 -- | Hooking up some lenses
 instance HasUinputCfg UinputEnv where uinputCfg = uinputCfg'
-
--- | Create a new UinputEnv from a UinputCfg
-mkUinputEnv :: MonadIO m => UinputCfg -> m UinputEnv
-mkUinputEnv c = UinputEnv c <$> newEmptyMVar
-
--- | The Uinput operations will need access to logging and the Uinput-environment
-type CanUinput e = (HasLogFunc e, HasUinputEnv e, HasUinputCfg e)
-
+instance HasLogFunc   UinputEnv where logFuncL  = logFunc
 
 --------------------------------------------------------------------------------
 -- $wrap
@@ -96,56 +95,59 @@ makeClassyPrisms ''UinputSinkError
 -- $ops
 
 -- | Open a uinput device and register it with linux
-uinputOpen :: CanUinput e => RIO e ()
-uinputOpen = do
+uinputOpen :: MonadIO m => LogFunc -> UinputCfg -> m UinputEnv
+uinputOpen lf c = runRIO lf $ do
 
   logInfo "Opening '/dev/uinput'"
   fd@(Fd h) <- liftIO . openFd "/dev/uinput" WriteOnly Nothing $
     OpenFileFlags False False False True False
 
-  name    <- view keyboardName
-  product <- view productCode
-  vendor  <- view vendorCode
-  version <- view productVersion
-  logInfo $ "Registering uinput device: " <> displayShow name
+  logInfo $ "Registering uinput device: " <> displayShow (c^.name)
   liftIO $ do
-    withCString name $ \s ->
-      acquire_uinput_keysink h s vendor product version
-        `onErr` UinputRegistrationError name
+    withCString (c^.name) $ \s ->
+      acquire_uinput_keysink h s (c^.vendor) (c^.product) (c^.version)
+        `onErr` UinputRegistrationError (c^.name)
 
-  view postInit >>= \case
-    Nothing -> pure ()
-    Just cmd -> do
-      logInfo $ "Running uinput post-init command: " <> displayShow cmd
-      void . async . callCommand $ cmd
+  flip (maybe $ pure ()) (c^.postInit) $ \cmd -> do
+    logInfo $ "Running uinput post-init command: " <> displayShow cmd
+    void . async . callCommand $ cmd
 
-  d <- view dev
-  putMVar d fd
+  UinputEnv c lf <$> newMVar fd
 
 -- | Unregister a uinput device with linux and close the file
-uinputClose :: CanUinput e => RIO e ()
+uinputClose :: RIO UinputEnv ()
 uinputClose = do
   fd@(Fd h) <- takeMVar =<< view dev
-  name      <- view keyboardName
+  nm        <- view name
 
   let release = do
-        logInfo $ "Unregistering Uinput device: " <> displayShow name
+        logInfo $ "Unregistering Uinput device: " <> displayShow nm
         liftIO $ release_uinput_keysink h
-                   `onErr` UinputReleaseError name
+                   `onErr` UinputReleaseError nm
 
   let close = do
-        logInfo $ "Closing Uinput device file for: " <> displayShow name
+        logInfo $ "Closing Uinput device file for: " <> displayShow nm
         liftIO . closeFd $ fd
 
   finally release close
 
 -- | Write a keyboard event to the sink and sync the driver state.
-uinputWrite :: CanUinput e => LE -> RIO e ()
+uinputWrite :: LinuxEvent -> RIO UinputEnv ()
 uinputWrite e = do
   d    <- view dev
   withMVar d $ \(Fd h) -> do
-    sendOne h $ _LRaw # e
+    sendOne h $ _RawEvent # e
     sendOne h =<< now sync
   where
-    sendOne h LRaw{_leType=t, _leCode=l, _leVal=v, _leS=s, _leNS=ns} =
+    sendOne h RawEvent{_leType=t, _leCode=l, _leVal=v, _leS=s, _leNS=ns} =
       void . liftIO $ send_event h (fi t) (fi l) (fi v) (fi s) (fi ns)
+
+-- | Context handler for Uinput writing
+withUinput :: MonadUnliftIO m
+  => UinputCfg                             -- ^ Uinput device settings
+  -> LogFunc
+  -> ((LinuxEvent -> m ()) -> m a) -- ^ Continuation to be filled in with writer
+  -> m a                               -- ^ Action that uses uinput as writer
+withUinput cfg lf f = do
+  bracket (uinputOpen lf cfg) (flip runRIO uinputClose)
+    (\env -> f $ \e -> runRIO env (uinputWrite e))
