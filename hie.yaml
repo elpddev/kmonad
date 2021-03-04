@@ -1,3 +1,7 @@
 cradle:
   stack:
     - path: "./src"
+      component: "kmonad:lib"
+
+    - path: "./app/Main.hs"
+      component: "kmonad:exe:kmonad"
