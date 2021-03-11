@@ -1,0 +1,9 @@
+<- syntax: comments, markdown
+
+contributing: ~ | Module structure
+
+  - Everything should live in KMonad.
+  - Categorize semantically into modules inside KMonad
+  - If a module grows too large:
+    - Turn it into a directory
+    - Have an `hs` file with the same name that imports from the directory

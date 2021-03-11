@@ -1,12 +1,17 @@
 {-|
 Module      : Main
-Description : The entry-point to KMonad
-Copyright   : (c) David Janssen, 2019
+Description : The entrypoint for the KMonad application
+Copyright   : (c) David Janssen, 2021
 License     : MIT
 
 Maintainer  : janssen.dhj@gmail.com
 Stability   : experimental
-Portability : non-portable (MPTC with FD, FFI to Linux-only c-code)
+Portability : non-portable
+
+note: we just import main from "KMonad.Main". The reason for this lib/app
+seperation is that @haddock@ will only generate documentation for libraries, so
+all of KMonad is built as a library.
+
 
 -}
 module Main
@@ -15,7 +20,4 @@ module Main
   )
 where
 
-import KMonad.Args (run)
-
-main :: IO ()
-main = run
+import KMonad.Main ( main )

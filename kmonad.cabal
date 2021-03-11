@@ -31,98 +31,85 @@ library
   build-depends:
       base
     , cereal
-    , contravariant
+    -- , contravariant
     , lens
     , megaparsec
     , mtl
     , optparse-applicative
-    , resourcet
+    -- , resourcet
     , rio
     , time
     , unliftio
   default-extensions:
       ConstraintKinds
-      DeriveFunctor
-      DeriveGeneric
-      DeriveTraversable
-      FlexibleContexts
-      FlexibleInstances
+      -- DeriveFunctor
+      -- DeriveGeneric
+      -- DeriveTraversable
+      -- FlexibleContexts
+      -- FlexibleInstances
       FunctionalDependencies
       GeneralizedNewtypeDeriving
       LambdaCase
       MultiParamTypeClasses
-      MultiWayIf
+      -- MultiWayIf
       NoImplicitPrelude
       OverloadedStrings
-      RankNTypes
+      -- RankNTypes
       TemplateHaskell
       TupleSections
       TypeFamilies
 
   exposed-modules:
-      KMonad.App.LayerStack
-      KMonad.Keyboard
-      KMonad.Keyboard.IO
-      KMonad.Keyboard.Types
-      KMonad.Action
-      KMonad.App
-      KMonad.App.BEnv
-      KMonad.App.Dispatch
-      KMonad.App.Hooks
-      KMonad.App.Keymap
-      KMonad.App.Sluice
-      KMonad.Args
-      KMonad.Args.Cmd
-      KMonad.Args.Parser
-      KMonad.Args.Joiner
-      KMonad.Args.Types
-      KMonad.Button
-      KMonad.Layer
-      KMonad.Parser.Keyboard.ComposeSeq
-      KMonad.Prelude
-      KMonad.Util
+    KMonad
+    KMonad.App
+    KMonad.App.Logging
+    KMonad.App.Types
+    KMonad.Cmd
+    KMonad.Core
+    KMonad.Prelude
+    KMonad.Main
 
-  if os(linux)
-    exposed-modules:
-      KMonad.Keyboard.Linux.Keycode
-      KMonad.Keyboard.Linux.Types
-      KMonad.Keyboard.Linux.IO.DeviceSource
-      KMonad.Keyboard.Linux.IO.UinputSink
-    c-sources:
-      c_src/keyio.c
-    build-depends:
-      unix
+  -- if os(linux)
+  --   exposed-modules:
+  --     KMonad.Keyboard.Linux.Keycode
+  --     KMonad.Keyboard.Linux.Types
+  --     KMonad.Keyboard.Linux.IO.DeviceSource
+  --     KMonad.Keyboard.Linux.IO.UinputSink
+  --   c-sources:
+  --     c_src/keyio.c
+  --   build-depends:
+  --     unix
 
-  if os(windows)
-    exposed-modules:
-      KMonad.Keyboard.Windows.Keycode
-      KMonad.Keyboard.Windows.Types
-      KMonad.Keyboard.Windows.IO.LowLevelHookSource
-      KMonad.Keyboard.Windows.IO.SendEventSink
-    c-sources:
-      c_src/keyio_win.c
-    build-depends:
-      Win32
+  -- if os(windows)
+  --   exposed-modules:
+  --     KMonad.Keyboard.Windows.Keycode
+  --     KMonad.Keyboard.Windows.Types
+  --     KMonad.Keyboard.Windows.IO.LowLevelHookSource
+  --     KMonad.Keyboard.Windows.IO.SendEventSink
+  --   c-sources:
+  --     c_src/keyio_win.c
+  --   build-depends:
+  --     Win32
 
-  if os(darwin)
-    exposed-modules:
-      KMonad.Keyboard.IO.Mac.IOKitSource
-      KMonad.Keyboard.IO.Mac.KextSink
-      KMonad.Keyboard.IO.Mac.Types
-    cxx-sources:
-      c_src/mac/keyio_mac.cpp
-    cxx-options:
-      -std=c++14
-    -- Commenting out, interferes with Hackage
-    -- include-dirs:
-    --   c_src/mac/Karabiner-VirtualHIDDevice/dist/include
-    extra-libraries:
-      c++
-    build-depends:
-      unix
-    frameworks:
-      CoreFoundation
-      IOKit
+  -- if os(darwin)
+  --   exposed-modules:
+  --     KMonad.Keyboard.IO.Mac.IOKitSource
+  --     KMonad.Keyboard.IO.Mac.KextSink
+  --     KMonad.Keyboard.IO.Mac.Types
+  --   cxx-sources:
+  --     c_src/mac/keyio_mac.cpp
+  --   cxx-options:
+  --     -std=c++14
+  --   -- Commenting out, interferes with Hackage
+  --   -- include-dirs:
+  --   --   c_src/mac/Karabiner-VirtualHIDDevice/dist/include
+  --   extra-libraries:
+  --     c++
+  --   build-depends:
+  --     unix
+  --   frameworks:
+  --     CoreFoundation
+  --     IOKit
 
 executable kmonad
   ghc-options:
