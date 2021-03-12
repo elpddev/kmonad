@@ -19,8 +19,11 @@ special place to live.
 
 -}
 module KMonad.Prelude
-  ( module X
-  , EnvIO
+  ( -- * Reexports
+    module X
+
+    -- * RIO utilities
+  , EnvIO, EnvUIO
   )
 where
 
@@ -37,9 +40,13 @@ import RIO as X hiding
     -- Some stuff I'd rather default to Text
   , unlines, lines
 
-    -- Names we'd like available
+    -- Names we'd like available for our own things
   , log, LogLevel
   )
 
--- | Type constraint shorthard for RIO classes
-type EnvIO m env = (MonadIO m, MonadReader env m)
+-- | Shorthand for MTL-constraints of MonadIO with a Reader env
+type EnvIO  m env = (MonadIO       m, MonadReader env m)
+
+-- | Shorthand for MTL-constraints of MonadUnliftIO with a Reader env
+type EnvUIO m env = (MonadUnliftIO m, MonadReader env m)
+

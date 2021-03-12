@@ -1,5 +1,4 @@
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RankNTypes #-}
 module KMonad.App.Types
 
 where
@@ -27,12 +26,8 @@ instance HasLogEnv AppEnv where logEnv = aeCfg.acLogEnv
 withApp :: MonadUnliftIO m => AppCfg -> (AppEnv -> m a) -> m a
 withApp c f = f $ AppEnv c
 
--- type App a = (EnvIO m a, HasAppEnv m)
-
-loop :: (EnvIO m env, HasAppEnv env, HasLogEnv env) => m ()
-loop = say "looping"
 
 type App a = forall m env. (EnvIO m env, HasLogEnv env, HasAppEnv env)  => m a
 
-loop' :: App ()
-loop' = say "looping'"
+loop :: App ()
+loop = say "looping'"
