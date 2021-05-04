@@ -1,0 +1,24 @@
+* Intro
+
+Welcome to the notes on the App structure of _kmonad.
+
+As you might've noticed, there are other modules as well, and App depends on
+some of those.
+
+App itself contains all of the 'plumbing' of _kmonad:
+- Acquiring a keyboard from the OS
+- Sending keyboard events to the OS
+- Parsing the invocation signature
+- Parsing configuration files
+- Logging
+
+The sequence we initialize in is:
+1. Setup logging
+2. Check the invocation signature
+3. Dispatch on the command
+
+These 3 steps *always* happen whenever kmonad is run, further actions will
+depend on what command is passed to _kmonad.
+
+NOTE: the entrypoint for _kmonad is 'main' in "KMonad.App.Main". It is this (and
+only this) function that gets imported into the _kmonad app.

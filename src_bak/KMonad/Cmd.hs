@@ -23,6 +23,14 @@ import KMonad.App
 
 import Options.Applicative as O
 
+{- Ideas:
+
+* add a 'runDelay' option to wait before starting the server (to allow time for
+  release of the enter-key when starting from command-line)
+
+-}
+
+
 --------------------------------------------------------------------------------
 -- $types
 

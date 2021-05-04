@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
@@ -9,7 +10,8 @@
 
 // Perform an IOCTL grab or release on an open keyboard handle
 int ioctl_keyboard(int fd, int grab) {
-  return ioctl(fd, EVIOCGRAB, grab);
+  if (ioctl(fd, EVIOCGRAB, grab) == -1) {return errno;}
+  else {return 0;};
 }
 
 // Acquire a filedescriptor as a uinput keyboard
@@ -34,14 +36,14 @@ int acquire_uinput_keysink(int fd, char *name, int vendor, int product, int vers
   ioctl(fd, UI_DEV_SETUP, &usetup);
 
   // Create the device
-  ioctl(fd, UI_DEV_CREATE);
-
-  return 0;
+  if (ioctl(fd, UI_DEV_CREATE) == -1) {return errno;}
+  else {return 0;}
 }
 
 // Release a uinput keyboard
 int release_uinput_keysink(int fd) {
-  return ioctl(fd, UI_DEV_DESTROY);
+  if (ioctl(fd, UI_DEV_DESTROY) == -1) {return errno;}
+  else {return 0;}
 }
 
 // Send a keyboard event through a file-descriptor

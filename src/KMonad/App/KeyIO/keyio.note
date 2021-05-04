@@ -1,0 +1,22 @@
+I've really struggled with the design of this module, it is by far the most
+complicated when it comes to how to arrange things.
+
+The main issue is:
+- We need to support at least 3 different KeyIO options for the different OSes
+  (Linux, Windows, Mac)
+- We want support for 'production' keyio, but also testing simulations
+- The different OSes use different representations for key-id
+- We'd like to keep the code simple, but flexible
+
+There are many different solutions, each with their own tradeoffs.
+
+NOTE: All input-tokens and their required configuration records (e.g. EvdevGet
+with EvdevCfg) should be compileable (and independent of) OS. We never want a
+cfg to fail in 1 os and succeed in another. The difference should be when the
+cfg gets turned into actions. I.e. the
+- loadInputToken
+- loadOutputToken
+functions are different.
+
+Stuff that should be available to *all* OSes is in 'KMonad.App.KeyIO.<OS>.Common'
+The input-tokens are defined in 'KMonad.App.KeyIO.Types'

@@ -1,0 +1,8 @@
+So it's questionable whether parser should live in Prelude or App.
+
+I've decided to go for both, because:
+
+1. There are some parsing primitives that I intend to reuse for future projects
+and are not bound to _kmonad in any way, those live in Prelude.
+
+2. There are some very _kmonad specific parsers, those live in App.

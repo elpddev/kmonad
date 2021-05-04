@@ -31,6 +31,8 @@ library
   build-depends:
       base
     , cereal
+    , comonad
+    , exceptions
     -- , contravariant
     , lens
     , megaparsec
@@ -38,36 +40,57 @@ library
     , optparse-applicative
     -- , resourcet
     , rio
+    -- , safe-exceptions
     , time
     , unliftio
+  if os(linux)
+    build-depends:
+      unix
+    c-sources:
+      c_src/keyio.c
   default-extensions:
       ConstraintKinds
       -- DeriveFunctor
       -- DeriveGeneric
       -- DeriveTraversable
-      -- FlexibleContexts
-      -- FlexibleInstances
+      FlexibleContexts
+      FlexibleInstances
       FunctionalDependencies
       GeneralizedNewtypeDeriving
+      GADTs
       LambdaCase
       MultiParamTypeClasses
       -- MultiWayIf
       NoImplicitPrelude
       OverloadedStrings
-      -- RankNTypes
+      RankNTypes
+      ScopedTypeVariables
       TemplateHaskell
       TupleSections
       TypeFamilies
 
   exposed-modules:
     KMonad
-    KMonad.App
+
+    KMonad.App.Invocation
+    KMonad.App.Invocation.Parser
+    KMonad.App.Invocation.IO
+    KMonad.App.Invocation.Types
+
     KMonad.App.Logging
-    KMonad.App.Types
-    KMonad.Cmd
-    KMonad.Core
+    KMonad.App.Logging.IO
+    KMonad.App.Logging.Types
+
+    KMonad.App.Main
+
     KMonad.Prelude
-    KMonad.Main
+    KMonad.Prelude.Types
+    KMonad.Prelude.Util
+
+    -- KMonad.Cmd
+    -- KMonad.Core
+    -- KMonad.Prelude
+    -- KMonad.Main
 
   -- if os(linux)
   --   exposed-modules:

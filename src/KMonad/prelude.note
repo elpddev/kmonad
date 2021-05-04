@@ -1,0 +1,3 @@
+
+The initial namespace
+The space that gets imported into every non-prelude module in kmonad

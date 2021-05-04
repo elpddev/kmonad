@@ -22,17 +22,24 @@ module KMonad.Prelude
   ( -- * Reexports
     module X
 
-    -- * RIO utilities
-  , EnvIO, EnvUIO
   )
 where
 
-import Control.Lens                as X
-import RIO.Text                    as X (unlines, lines, pack, unpack)
 
+import Control.Comonad             as X
+-- import Control.Exception           as X (throw)
+import Control.Exception.Lens      as X
+import Control.Lens                as X
+import Control.Monad.Except        as X
+import Data.Typeable               as X (cast)
+
+import KMonad.Prelude.Util         as X
+import KMonad.Prelude.Parser       as X
+import KMonad.Prelude.Types        as X
+
+import RIO.Text                    as X (unlines, lines, pack, unpack)
 import RIO as X hiding
-  (
-    -- Prefer "Control.Lens"
+  ( -- Prefer "Control.Lens"
     view, ASetter, ASetter', Lens, Getting, Lens'
   , SimpleGetter, lens, over, set, sets, to, (^.)
   , (^..), (^?), preview, (%~), (.~)
@@ -41,12 +48,7 @@ import RIO as X hiding
   , unlines, lines
 
     -- Names we'd like available for our own things
-  , log, LogLevel
-  )
+  , log, LogLevel(..), wait
 
--- | Shorthand for MTL-constraints of MonadIO with a Reader env
-type EnvIO  m env = (MonadIO       m, MonadReader env m)
-
--- | Shorthand for MTL-constraints of MonadUnliftIO with a Reader env
-type EnvUIO m env = (MonadUnliftIO m, MonadReader env m)
-
+    -- Changed to a monad-constraint
+  , IO )
