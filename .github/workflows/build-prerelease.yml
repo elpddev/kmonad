@@ -31,12 +31,14 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-
+ 
+    - name: Build
+      run: stack build --system-ghc --copy-bins --local-bin-path ./
+      
     - name: version
-      run: echo "::set-output name=version::1.2.5"
+      run: echo "::set-output name=version::1.2.6"
       id: version
       
-
     - name: release
       uses: actions/create-release@v1
       id: create_release
@@ -44,15 +46,11 @@ jobs:
         draft: false
         prerelease: true
         release_name: ${{ steps.version.outputs.version }}
-        tag_name: ${{ github.ref }}12
+        tag_name: ${{ github.ref }}13
         body_path: changelog.md
       env:
         GITHUB_TOKEN: ${{ github.token }}
         
-    - name: Build
-      run: stack build --system-ghc --copy-bins --local-bin-path ./
-      
-      
     - name: upload linux artifact
       uses: actions/upload-release-asset@v1
       env:
