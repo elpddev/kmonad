@@ -34,3 +34,29 @@ jobs:
 
     - name: Build
       run: stack build --system-ghc
+      
+    - name: version
+      run: echo "::set-output name=version::1.2.3"
+      id: version
+      
+    - name: release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        draft: false
+        prerelease: true
+        release_name: ${{ steps.version.outputs.version }}
+        tag_name: ${{ github.ref }}
+        body_path: changelog.md
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      
+    - name: upload linux artifact
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: .stack-work/dist/x86_64-linux/Cabal-2.4.0.1/build/kmonad
+        asset_name: kmonad
+        asset_content_type: application/x-executable
