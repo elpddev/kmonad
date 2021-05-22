@@ -33,7 +33,7 @@ jobs:
           ${{ runner.os }}-
 
     - name: Build
-      run: stack build --system-ghc
+      run: stack build --system-ghc --copy-bins --local-bin-path ./
       
     - name: version
       run: echo "::set-output name=version::1.2.3"
@@ -57,6 +57,6 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: .stack-work/dist/x86_64-linux/Cabal-2.4.0.1/build/kmonad
+        asset_path: ./kmonad
         asset_name: kmonad
         asset_content_type: application/x-executable
