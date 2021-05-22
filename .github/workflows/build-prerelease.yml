@@ -33,4 +33,4 @@ jobs:
           ${{ runner.os }}-
 
     - name: Build
-      run: stack build
+      run: stack build --system-ghc
